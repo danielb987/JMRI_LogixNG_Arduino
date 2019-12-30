@@ -1,5 +1,65 @@
+/****************************************************************************
+ * 	Copyright (C) 2009 to 2013 Alex Shepherd
+ * 	Copyright (C) 2013 Damian Philipp
+ *  Copyright (C) 2019 Daniel Bergqvist
+ * 
+ * 	Portions Copyright (C) Digitrax Inc.
+ * 	Portions Copyright (C) Uhlenbrock Elektronik GmbH
+ * 
+ * 	This library is free software; you can redistribute it and/or
+ * 	modify it under the terms of the GNU Lesser General Public
+ * 	License as published by the Free Software Foundation; either
+ * 	version 2.1 of the License, or (at your option) any later version.
+ * 
+ * 	This library is distributed in the hope that it will be useful,
+ * 	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * 	Lesser General Public License for more details.
+ * 
+ * 	You should have received a copy of the GNU Lesser General Public
+ * 	License along with this library; if not, write to the Free Software
+ * 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ *****************************************************************************
+ * 
+ * 	IMPORTANT:
+ * 
+ * 	Some of the message formats used in this code are Copyright Digitrax, Inc.
+ * 	and are used with permission as part of the MRRwA (previously EmbeddedLocoNet) project.
+ *  That permission does not extend to uses in other software products. If you wish
+ * 	to use this code, algorithm or these message formats outside of
+ * 	MRRwA, please contact Digitrax Inc, for specific permission.
+ * 
+ * 	Note: The sale any LocoNet device hardware (including bare PCB's) that
+ * 	uses this or any other LocoNet software, requires testing and certification
+ * 	by Digitrax Inc. and will be subject to a licensing agreement.
+ * 
+ * 	Please contact Digitrax Inc. for details.
+ * 
+ *****************************************************************************
+ * 
+ * 	IMPORTANT:
+ * 
+ * 	Some of the message formats used in this code are Copyright Uhlenbrock Elektronik GmbH
+ * 	and are used with permission as part of the MRRwA (previously EmbeddedLocoNet) project.
+ *  That permission does not extend to uses in other software products. If you wish
+ * 	to use this code, algorithm or these message formats outside of
+ * 	MRRwA, please contact Copyright Uhlenbrock Elektronik GmbH, for specific permission.
+ * 
+ *****************************************************************************
+ * 	DESCRIPTION
+ *  This module provides virtual SV registers that uses callback functions
+ *  instead of reading or writing eeprom memory. It's used to send character
+ *  strings and floating point numbers to and from the device.
+ *
+ *  This package relies on the mrrwa LocoNet library and a lot of code is
+ *  fetched from that library.
+ * 
+ *****************************************************************************/
+
+
 // Uncomment to enable SV Processing Debug Print statements
-#define DEBUG_SV
+//#define DEBUG_SV
 
 
 #include <stdlib.h>
@@ -175,10 +235,11 @@ int LocoNetVirtualSystemVariableClass::processMessage(lnMsg *LnPacket )
     case SV_WRITE_QUAD:
         // fall through intended!
     case SV_READ_QUAD:
+#ifdef DEBUG_SV
         Serial.print("SV address: ");
         Serial.println(unData.stDecoded.unMfgIdDevIdOrSvAddress.w);
-
-		if (!handleSVReadWrite(unData.stDecoded.unMfgIdDevIdOrSvAddress.w, unData.abPlain[4], unData.abPlain[5], unData.abPlain[6], unData.abPlain[7]))
+#endif
+		if (handleSVReadWrite(unData.stDecoded.unMfgIdDevIdOrSvAddress.w, unData.abPlain[4], unData.abPlain[5], unData.abPlain[6], unData.abPlain[7]))
 			return VIRTUAL_SV_NOT_HANDLED;
 
         break;
@@ -211,13 +272,10 @@ int LocoNetVirtualSystemVariableClass::processMessage(lnMsg *LnPacket )
 
 int LocoNetVirtualSystemVariableClass::handleSVReadWrite(uint16_t address, uint8_t &d1, uint8_t &d2, uint8_t &d3, uint8_t &d4)
 {
-  Serial.println("aaa");
   for (int i=0; i < numVirtualSV; i++)
   {
-    Serial.println("bbb");
     if (virtual_SV_Struct[i].svAddr == address)
     {
-      Serial.println("ccc");
       char *buffer = virtual_SV_Struct[i].buffer;
       int index = d4 & 0x7F;
 
@@ -230,23 +288,18 @@ int LocoNetVirtualSystemVariableClass::handleSVReadWrite(uint16_t address, uint8
         return 0;
       }
 
-      Serial.println("ddd");
       switch (virtual_SV_Struct[i].type)
       {
         case READ_FLOAT:
-          Serial.println("eee");
-          break;
+          return 0;
 
         case WRITE_FLOAT:
-          Serial.println("fff");
-          break;
+          return 0;
 
         case READ_STRING:
-          Serial.println("ggg");
-          break;
+          return 0;
 
         case WRITE_STRING:
-          Serial.println("hhh");
           buffer[index] = d1;
           buffer[index + 1] = d2;
           buffer[index + 2] = d3;
@@ -257,11 +310,10 @@ int LocoNetVirtualSystemVariableClass::handleSVReadWrite(uint16_t address, uint8
 		  // four bytes, in total seven bytes, we cannot receive any more characters.
 		  // In either case, call the callback function.
           if ((d4 >= 0x80) || (index+7 >= virtual_SV_Struct[i].bufSize)) {
-            Serial.println("iii");
             virtual_SV_Struct[i].callbackString(address, buffer);
           }
 
-          break;
+          return 0;
 
         default:
           Serial.print("Unknown type: ");
@@ -270,7 +322,7 @@ int LocoNetVirtualSystemVariableClass::handleSVReadWrite(uint16_t address, uint8
     }
   }
 
-  return 0;
+  return 1;
 }
 
 

@@ -10,7 +10,7 @@ boolean deferredProcessingNeeded = false;
 
 static LnBuf LnTxBuffer ;
 static lnMsg *LnPacket;
-static char buffer[30];
+// static char buffer[30];
 
 int card_addr = 200;
 int sv_addr = 100;
@@ -61,9 +61,9 @@ void loop() {
   LnPacket = LocoNet.receive() ;
   if( LnPacket )
   {
+/*
     // Get the length of the received packet
     uint8_t Length = getLnMsgSize( LnPacket ) ;
-
     // Send the received packet out byte by byte to the PC
     for( uint8_t Index = 0; Index < Length; Index++ ) {
       ltoa(LnPacket->data[Index],buffer,10);
@@ -71,19 +71,19 @@ void loop() {
       Serial.write(", ");
     }
     Serial.write("\n");
-
+*/
 
     
     int virtualSvStatus = virtual_sv.processMessage(LnPacket);
 //    int virtualSvStatus = VIRTUAL_SV_NOT_HANDLED;
 //    virtualSvStatus = VIRTUAL_SV_NOT_HANDLED;
-    Serial.print("Virtual SV processMessage - Status: ");
-    Serial.println(virtualSvStatus);
+//    Serial.print("Virtual SV processMessage - Status: ");
+//    Serial.println(virtualSvStatus);
 
     if (virtualSvStatus == VIRTUAL_SV_NOT_HANDLED) {
       svStatus = sv.processMessage(LnPacket);
-      Serial.print("LNSV processMessage - Status: ");
-      Serial.println(svStatus);
+//      Serial.print("LNSV processMessage - Status: ");
+//      Serial.println(svStatus);
     
       deferredProcessingNeeded = (svStatus == SV_DEFERRED_PROCESSING_NEEDED);
     }

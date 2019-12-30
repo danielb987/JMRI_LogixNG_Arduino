@@ -1,6 +1,66 @@
 #ifndef __LOCONET_SV
 #define __LOCONET_SV
 
+/****************************************************************************
+ * 	Copyright (C) 2009 to 2013 Alex Shepherd
+ * 	Copyright (C) 2013 Damian Philipp
+ *  Copyright (C) 2019 Daniel Bergqvist
+ * 
+ * 	Portions Copyright (C) Digitrax Inc.
+ * 	Portions Copyright (C) Uhlenbrock Elektronik GmbH
+ * 
+ * 	This library is free software; you can redistribute it and/or
+ * 	modify it under the terms of the GNU Lesser General Public
+ * 	License as published by the Free Software Foundation; either
+ * 	version 2.1 of the License, or (at your option) any later version.
+ * 
+ * 	This library is distributed in the hope that it will be useful,
+ * 	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * 	Lesser General Public License for more details.
+ * 
+ * 	You should have received a copy of the GNU Lesser General Public
+ * 	License along with this library; if not, write to the Free Software
+ * 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ *****************************************************************************
+ * 
+ * 	IMPORTANT:
+ * 
+ * 	Some of the message formats used in this code are Copyright Digitrax, Inc.
+ * 	and are used with permission as part of the MRRwA (previously EmbeddedLocoNet) project.
+ *  That permission does not extend to uses in other software products. If you wish
+ * 	to use this code, algorithm or these message formats outside of
+ * 	MRRwA, please contact Digitrax Inc, for specific permission.
+ * 
+ * 	Note: The sale any LocoNet device hardware (including bare PCB's) that
+ * 	uses this or any other LocoNet software, requires testing and certification
+ * 	by Digitrax Inc. and will be subject to a licensing agreement.
+ * 
+ * 	Please contact Digitrax Inc. for details.
+ * 
+ *****************************************************************************
+ * 
+ * 	IMPORTANT:
+ * 
+ * 	Some of the message formats used in this code are Copyright Uhlenbrock Elektronik GmbH
+ * 	and are used with permission as part of the MRRwA (previously EmbeddedLocoNet) project.
+ *  That permission does not extend to uses in other software products. If you wish
+ * 	to use this code, algorithm or these message formats outside of
+ * 	MRRwA, please contact Copyright Uhlenbrock Elektronik GmbH, for specific permission.
+ * 
+ *****************************************************************************
+ * 	DESCRIPTION
+ *  This module provides virtual SV registers that uses callback functions
+ *  instead of reading or writing eeprom memory. It's used to send character
+ *  strings and floating point numbers to and from the device.
+ *
+ *  This package relies on the mrrwa LocoNet library and a lot of code is
+ *  fetched from that library.
+ * 
+ *****************************************************************************/
+
+
 #include <LocoNet.h>
 
 #define MAX_VIRTUAL_SV 10
